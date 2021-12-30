@@ -10,7 +10,8 @@ black = 0, 0, 0
 green = 0, 100, 0
 
 screen = pygame.display.set_mode(size)
-print(type(screen))
+clock = pygame.time.Clock()
+pygame.time.set_timer(pygame.USEREVENT, 1000)
 
 dog = pygame.image.load("dogLevel2.gif")
 dogrect = dog.get_rect()
@@ -33,7 +34,8 @@ def mission(screen: pygame.Surface, credit: int):
     while 1:
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
-
+            if event.type == pygame.USEREVENT:
+                credit -= 1
         dogrect.x = 40
         dogrect.y = 100
 
@@ -58,6 +60,8 @@ def mission(screen: pygame.Surface, credit: int):
                 #counting -= 1
             else:
                 return credit
+        if event.type == pygame.USEREVENT:
+            credit -= 1
 
 
         screen.fill(green)
@@ -75,32 +79,43 @@ def mission(screen: pygame.Surface, credit: int):
         screen.blit(mytext, (20, 10))
         screen.blit(sidetext, (20, 30 ))
         pygame.display.flip()
+        clock.tick(60)
 
 
 while 1:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: sys.exit()
 
     dogrect.x = 40
     dogrect.y = 100
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT: sys.exit()
+        if event.type == pygame.USEREVENT:
+            #credit -= 1
+            pass
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = pygame.mouse.get_pos()
+            if dogrect.x < x < dogrect.x + dogrect.width and dogrect.y < y < dogrect.y + dogrect.height:
+                dogrect.x += 10
+                dogrect.y += 10
+                credit += definc
+                mytext = myfont.render(f'Twoje zebrane punkty: {credit}', 1, black)
+
+
 
     x = random.randint(1,100)
 
-    event = pygame.event.wait()
-    x,y = pygame.mouse.get_pos()
-    if event.type == pygame.MOUSEBUTTONDOWN and dogrect.x < x < dogrect.x + dogrect.width and dogrect.y < y <dogrect.y + dogrect.height:
-        dogrect.x += 10
-        dogrect.y += 10
-        credit+=definc
-        mytext = myfont.render(f'Twoje zebrane punkty: {credit}', 1, black)
+    #event = pygame.event.wait()
 
-    if credit == 2:
+
+
+    if credit == 20:
         qtext = myfont.render(f'Masz nowy quest, ukończ go aby uzyskać nagrodę!', 1, (255,100,100))
         credit = mission(screen, credit)
         qtext = myfont.render(f'Brak aktywnej misji :(', 1, black)
         dog = pygame.image.load("dog3.gif")
         definc +=1
-
+    if event.type == pygame.USEREVENT:
+        pass
+        #credit -= 1
     licznikPetliGlownej+=1
 
     screen.fill(green)
@@ -108,5 +123,6 @@ while 1:
     screen.blit(qtext, (500, 10))
     screen.blit(mytext, (20,10))
     pygame.display.flip()
+    clock.tick(60)
 
 
