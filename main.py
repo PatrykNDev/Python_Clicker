@@ -5,8 +5,8 @@ pygame.init()
 pygame.font.init()
 pygame.display.init()
 
-size = width, height = 1320, 780
-black = 0, 0, 0
+size = width, height = 1244, 800
+blue = 50, 100, 200
 green = 0, 100, 0
 
 screen = pygame.display.set_mode(size)
@@ -14,114 +14,114 @@ clock = pygame.time.Clock()
 pygame.time.set_timer(pygame.USEREVENT, 1000)
 
 dog = pygame.image.load("dogLevel2.gif")
-dogrect = dog.get_rect()
+dog_rect = dog.get_rect()
+background = pygame.image.load("aurora-02.gif")
+bcgRect = background.get_rect()
 
-licznikPetliGlownej = 0
 credit = 0
-definc = 1
-myfont = pygame.font.SysFont(None, 30)
-mytext = myfont.render(f'Twoje zebrane punkty: {credit}', 1, black)
-qtext = myfont.render(f'Brak aktywnej misji :(', 1, black)
+def_inc = 1
+my_font = pygame.font.SysFont(None, 30)
+my_text = my_font.render(f'Twoje zebrane punkty: {credit}', 1, blue)
+q_text = my_font.render(f'Brak aktywnej misji :(', 1, blue)
 
 
 def mission(screen: pygame.Surface, credit: int):
-    counting = 10
-    mytext = myfont.render(f'Twoje zebrane punkty: {credit}', 1, black)
-    qtext = myfont.render(f'Masz nowy quest, ukończ go aby uzyskać nagrodę!', 1, (255, 100, 100))
-    sidetext = myfont.render(f'Quest zacznie się za: {counting} ', 1, (255, 100, 100))
+    counting = 4 #10
+    my_text = my_font.render(f'Twoje zebrane punkty: {credit}', 1, blue)
+    q_text = my_font.render(f'Masz nowy quest, ukończ go aby uzyskać więcej punktów za 1 klik myszką!', 1, (255, 100, 100))
+    side_text = my_font.render(f'Quest zacznie się za: {counting} ', 1, (255, 100, 100))
     progress = 0.52
-    questStarted = False
+    quest_started = False
+    mission_passed = False
+
     while 1:
+        dog_rect.x = 40
+        dog_rect.y = 100
+        if quest_started:
+            if progress > 0:
+                progress -= 0.009#0.001
+            else:
+                return credit, mission_passed
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
-            if event.type == pygame.USEREVENT:
-                credit -= 1
-        dogrect.x = 40
-        dogrect.y = 100
-
-        event = pygame.event.wait()
-        x, y = pygame.mouse.get_pos()
-        if questStarted == True:
-            progress -= 0.02
-        if event.type == pygame.MOUSEBUTTONDOWN and dogrect.x < x < dogrect.x + dogrect.width and dogrect.y < y < dogrect.y + dogrect.height:
-            dogrect.x += 10
-            dogrect.y += 10
-            credit += definc
-            mytext = myfont.render(f'Twoje zebrane punkty: {credit}', 1, black)
-            if counting >=1:
-                counting -= 1
-                sidetext = myfont.render(f'Quest zacznie się za: {counting} ', 1, (255, 100, 100))
-                if counting == 0:
-                    questStarted = True
-            elif counting < 1 and progress < 1.0 and progress > 0.0:
-                sidetext = myfont.render(f'Quest się zaczął', 1, (255, 100, 100))
-                progress += 0.1
-
-                #counting -= 1
-            else:
-                return credit
-        if event.type == pygame.USEREVENT:
-            credit -= 1
-
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                if dog_rect.x < x < dog_rect.x + dog_rect.width and dog_rect.y < y < dog_rect.y + dog_rect.height:
+                    dog_rect.x += 10
+                    dog_rect.y += 10
+                    credit += def_inc
+                    my_text = my_font.render(f'Twoje zebrane punkty: {credit}', 1, blue)
+                    if counting >= 1:
+                        counting -= 1
+                        side_text = my_font.render(f'Quest zacznie się za: {counting} ', 1, (255, 100, 100))
+                        if counting == 0:
+                            quest_started = True
+                    elif counting < 1 and progress < 1.0 and progress > 0.0:
+                        side_text = my_font.render(f'Quest się zaczął', 1, (255, 100, 100))
+                        progress += 0.1
+                    else:
+                        mission_passed = True
 
         screen.fill(green)
         left = 500
         top = 40
-        maxwidth = 400
+        max_width = 400
         height = 20
-        progressTemp = progress
-        if progressTemp > 1.0:
-            progressTemp = 1.0
-        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(left, top, maxwidth * progressTemp, height))
-        pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(left, top, maxwidth, height), 1)
-        screen.blit(dog, dogrect)
-        screen.blit(qtext, (500, 10))
-        screen.blit(mytext, (20, 10))
-        screen.blit(sidetext, (20, 30 ))
+        progress_temp = progress
+        if progress_temp > 1.0:
+            progress_temp = 1.0
+        screen.blit(background, bcgRect)
+        pygame.draw.rect(screen, (255, 255, 255), pygame.Rect(left, top, max_width * progress_temp, height))
+        pygame.draw.rect(screen, (0, 0, 0), pygame.Rect(left, top, max_width, height), 1)
+        screen.blit(dog, dog_rect)
+        screen.blit(q_text, (500, 10))
+        screen.blit(my_text, (20, 10))
+        screen.blit(side_text, (20, 30 ))
         pygame.display.flip()
         clock.tick(60)
+        if mission_passed:
+            return credit, mission_passed
 
 
+quest1_started = False
+click = False
 while 1:
 
-    dogrect.x = 40
-    dogrect.y = 100
+    dog_rect.x = 40
+    dog_rect.y = 100
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
-        if event.type == pygame.USEREVENT:
-            #credit -= 1
-            pass
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = pygame.mouse.get_pos()
-            if dogrect.x < x < dogrect.x + dogrect.width and dogrect.y < y < dogrect.y + dogrect.height:
-                dogrect.x += 10
-                dogrect.y += 10
-                credit += definc
-                mytext = myfont.render(f'Twoje zebrane punkty: {credit}', 1, black)
+            if dog_rect.x < x < dog_rect.x + dog_rect.width and dog_rect.y < y < dog_rect.y + dog_rect.height:
+                dog_rect.x += 10
+                dog_rect.y += 10
+                credit += def_inc
+                my_text = my_font.render(f'Twoje zebrane punkty: {credit}', 1, blue)
+                click_text = my_font.render(f'+ {def_inc}', 1, blue)
+                click = True
 
-
-
-    x = random.randint(1,100)
-
-    #event = pygame.event.wait()
-
-
-
-    if credit == 20:
-        qtext = myfont.render(f'Masz nowy quest, ukończ go aby uzyskać nagrodę!', 1, (255,100,100))
-        credit = mission(screen, credit)
-        qtext = myfont.render(f'Brak aktywnej misji :(', 1, black)
+    if credit == 5:
+        quest1_started = True
+        credit, mission_passed = mission(screen, credit)
+        my_text = my_font.render(f'Twoje zebrane punkty: {credit}', 1, blue)
+        q_text = my_font.render(f'Brak aktywnej misji :(', 1, blue)
+        if mission_passed:
+            m1_text = my_font.render('Przeszedles pierwsza misje i twoje kliknięcia są teraz warte o 1 punkt więcej', 1, blue)
+            def_inc += 1
+        else:
+            m1_text = my_font.render('Przegrałeś pierwszą misję', 1, blue)
         dog = pygame.image.load("dog3.gif")
-        definc +=1
-    if event.type == pygame.USEREVENT:
-        pass
-        #credit -= 1
-    licznikPetliGlownej+=1
+        dog_rect = dog.get_rect()
 
-    screen.fill(green)
-    screen.blit(dog, dogrect)
-    screen.blit(qtext, (500, 10))
-    screen.blit(mytext, (20,10))
+    screen.blit(background, bcgRect)
+    screen.blit(dog, dog_rect)
+    screen.blit(q_text, (500, 10))
+    if quest1_started:
+        screen.blit(m1_text, (500, 30))
+    if click:
+        screen.blit(click_text, (dog_rect.x+dog_rect.width + 10, dog_rect.y+(dog_rect.height/2.0)))
+    screen.blit(my_text, (20, 10))
     pygame.display.flip()
     clock.tick(60)
 
