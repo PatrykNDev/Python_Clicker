@@ -32,7 +32,7 @@ class Game():
         self.background = pygame.image.load('img/background_level_1.png')
         self.bcgRect = self.background.get_rect()
         # Inicjalizacja zmiennych
-        self.credit = 0
+        self.credit = 0  # Punkty zdobyte przez gracza
         self.def_inc = 1  # Punkty otrzymywane za pojedyncze kliknięcie
         # Inicjalizacja czcionek
         self.my_font = pygame.font.SysFont(None, 30)
@@ -75,46 +75,47 @@ class Game():
         self.dog_rect.y = self.screen.get_height() - self.dog_rect.height - 80
         while True:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT: sys.exit()
+                if event.type == pygame.QUIT:
+                    sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = pygame.mouse.get_pos()
                     if self.dog_rect.x < x < self.dog_rect.x + self.dog_rect.width and self.dog_rect.y < y < self.dog_rect.y + self.dog_rect.height:
                         # Obsłużenie kliknięcia myszką w klikalny obiekt z ekranu gry.
                         # Na początku animacja przesunięcia klikniętego obiektu.
-                        self.dog_rect.x += 10
-                        self.dog_rect.y += 10
-                        self.credit += self.def_inc  # Zwiększenie liczby punktów
-                        # Aktualizacja obiektów zawierających teksty
-                        self.my_text = self.my_font.render(f'Twoje zebrane punkty: {self.credit}', 1, self.blue)
+                        self.dog_rect.x = 50
+                        self.dog_rect.y = self.screen.get_height() - self.dog_rect.height - 70
+                        # Zwiększenie liczby punktów
+                        self.credit += self.def_inc
+                        # Aktualizacja wyniku gracza na ekranie
+                        self.update_shown_score()
+                        # Animacja pokazująca ile punktów gracz dostał za kliknięcie
                         self.click_text = self.my_font.render(f'+ {self.def_inc}', 1, self.pink)
                         # Odliczanie klatek animacji kliknięcia
                         self.click = True
                         self.click_time = 10
-                        # Animacja "odkliknięcia" klikalnego obiektu
-                        self.dog_rect.x -= 10
-                        self.dog_rect.y -= 10
                     elif 820 <= x <= 1034 and 110 <= y <= 241 and self.credit >= self.pet_sit_cost:
                         # Obsłużenie kliknięcia w ulepszenie dające +1 /s.
                         # Ulepszenie jest obsłużone w funkcji self.shop_draw() przez odczytanie wartości obiektu self.pet_sit_clicked == True.
                         self.credit -= self.pet_sit_cost
-                        self.my_text = self.my_font.render(f'Twoje zebrane punkty: {self.credit}', 1, self.blue)
+                        self.update_shown_score()
+                        # self.my_text = self.my_font.render(f'Twoje zebrane punkty: {self.credit}', 1, self.blue)
                         self.pet_sit_clicked = True
                     elif 820 <= x <= 1034 and 246 <= y <= 460 and self.credit >= self.click_upg_cost:
                         # Obsłużenie kliknięcia w ulepszenie dające więcej punktów za kliknięcie w obiekt dog_rect.
                         # Ulepszenie jest obsłużone w funkcji self.draw_second_upgrade() przez odczytanie wartości obiektu self.click_upg_clicked == True.
                         self.credit -= self.click_upg_cost
-                        self.my_text = self.my_font.render(f'Twoje zebrane punkty: {self.credit}', 1, self.blue)
+                        self.update_shown_score()
                         self.click_upg_clicked = True
                     elif 820 <= x <= 1034 and 465 <= y <= 679 and self.credit >= self.dog_upg_cost and self.dog_upg_cost <= 55:
                         # Obsłużenie kliknięcia w ulepszenie zmieniające grafikę w grze.
                         # Ulepszenie jest obsłużone w funkcji self.draw_third_upgrade() oraz poniżej w kodzie przez odczytanie wartości obiektu self.dog_upg_clicked == True.
                         self.credit -= self.dog_upg_cost
-                        self.my_text = self.my_font.render(f'Twoje zebrane punkty: {self.credit}', 1, self.blue)
+                        self.update_shown_score()
                         self.dog_upg_clicked = True
                 if event.type == pygame.USEREVENT:
                     # Zwiększanie wyniku gracza co 1s
                     self.credit += self.inc_per_s
-                    self.my_text = self.my_font.render(f'Twoje zebrane punkty: {self.credit}', 1, self.blue)
+                    self.update_shown_score()
                     # Losowanie misji.
                     # Jeżeli self.mission_switch == n, aktywowana jest n-ta misja.
                     self.mission_switch = random.randint(1, 75)
@@ -126,7 +127,7 @@ class Game():
                 self.credit, self.mission_passed = self.mission(self.screen,
                                                                 self.credit)  # Funkcja zmieniająca rysowanie ekranu
                 # Aktualizowanie obiektów wyświetlanych później na ekranie po zakończeniu działania misji
-                self.my_text = self.my_font.render(f'Twoje zebrane punkty: {self.credit}', 1, self.blue)
+                self.update_shown_score()
                 self.q_text = self.my_font.render(f'Brak aktywnej misji :(', 1, self.blue)
                 # Rozeznanie czy misja została zakończona sukcesem czy porażką
                 if self.mission_passed:
@@ -146,7 +147,7 @@ class Game():
                 self.credit, self.mission2_passed = self.mission2(self.screen, self.credit,
                                                                   self.dog_upg_cost)  # self.mission2() - funkcja odpowiedzialna za wyświetlanie misji
                 # Aktualizacja obiektów wyświetlanych później na ekranie po zakończeniu działania misji
-                self.my_text = self.my_font.render(f'Twoje zebrane punkty: {self.credit}', 1, self.blue)
+                self.update_shown_score()
                 self.q_text = self.my_font.render(f'Brak aktywnej misji :(', 1, self.blue)
                 # Rozeznanie czy misja została zakończona sukcesem czy porażką
                 if self.mission2_passed:
@@ -208,6 +209,11 @@ class Game():
             # Rozliczenie klatek animacji kliknięcie w psa
             if self.click_time > 0:
                 self.click_time -= 1
+            elif self.click and self.click_time == 0:
+                # Animacja "odkliknięcia" klikalnego obiektu
+                self.dog_rect.x = 40
+                self.dog_rect.y = self.screen.get_height() - self.dog_rect.height - 80
+                self.click = False
             # Napis +1' lub  '+2' lub '+3' itd. za każde kliknięcie myszką, zależny od zmiennej def_inc
             if self.click and self.click_time > 0:
                 self.screen.blit(self.click_text, (
@@ -310,6 +316,11 @@ class Game():
 
         pygame.draw.rect(self.screen, self.blue, pygame.Rect(15, 70, points_on_click_txt.get_width() + 10, 21), 1)
         self.screen.blit(points_per_second_txt, (20, 72))
+
+    def update_shown_score(self):
+        # Aktualizacja obiektów zawierających teksty po kliknięciu
+        self.my_text = self.my_font.render(f'Twoje zebrane punkty: {self.credit}', 1, self.blue)
+
 
     # Logika misji ze znikającym obiektem do klikania
     def mission2(self, screen: pygame.Surface, credit: int, dog_upg_cost: int) -> (int, bool):
